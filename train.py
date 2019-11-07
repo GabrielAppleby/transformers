@@ -42,15 +42,53 @@ def train(transformer, train_dataset, d_model):
         ckpt.restore(ckpt_manager.latest_checkpoint)
         print('Latest checkpoint restored!!')
 
+    ###########################################################################
+    # The @tf.function trace-compiles train_step into a TF graph for faster
+    # execution. The function specializes to the precise shape of the argument
+    # tensors. To avoid re-tracing due to the variable sequence lengths or variable
+    # batch sizes (the last batch is smaller), use input_signature to specify
+    # more generic shapes.
+    @tf.function(input_signature=TRAIN_STEP_SIGNATURE)
+    def train_step(inp, tar):
+        """
+        Takes one step in the training process.
+        :param transformer: The transformer to train.
+        :param optimizer: The optimizer to use.
+        :param inp: The input sentence.
+        :param tar: The target sentence.
+        :return: None. As a side effect the weights of the transformer are changed.
+        """
+        tar_inp = tar[:, :-1]
+        tar_real = tar[:, 1:]
+
+        enc_padding_mask, combined_mask, dec_padding_mask = create_masks(inp,
+                                                                         tar_inp)
+
+        with tf.GradientTape() as tape:
+            predictions, _ = transformer(inp, tar_inp,
+                                         True,
+                                         enc_padding_mask,
+                                         combined_mask,
+                                         dec_padding_mask)
+            loss = loss_function(tar_real, predictions)
+
+        gradients = tape.gradient(loss, transformer.trainable_variables)
+        optimizer.apply_gradients(
+            zip(gradients, transformer.trainable_variables))
+
+        train_loss(loss)
+        train_accuracy(tar_real, predictions)
+    ###########################################################################
+
     # Actual training loop
-    for epoch in range(20):
+    for epoch in range(1):
         start = time.time()
 
         train_loss.reset_states()
         train_accuracy.reset_states()
 
         for (batch, (inp, tar)) in enumerate(train_dataset):
-            train_step(transformer, optimizer, inp, tar)
+            train_step(inp, tar)
 
             if batch % 50 == 0:
                 print('Epoch {} Batch {} Loss {:.4f} Accuracy {:.4f}'.format(
@@ -66,34 +104,3 @@ def train(transformer, train_dataset, d_model):
                                                             train_accuracy.result()))
 
         print('Time taken for 1 epoch: {} secs\n'.format(time.time() - start))
-
-# The @tf.function trace-compiles train_step into a TF graph for faster
-# execution. The function specializes to the precise shape of the argument
-# tensors. To avoid re-tracing due to the variable sequence lengths or variable
-# batch sizes (the last batch is smaller), use input_signature to specify
-# more generic shapes.
-@tf.function(input_signature=TRAIN_STEP_SIGNATURE)
-def train_step(transformer, optimizer, inp, tar):
-    """
-    Takes one step in the training process.
-    :param transformer: The transformer to train.
-    :param optimizer: The optimizer to use.
-    :param inp: The input sentence.
-    :param tar: The target sentence.
-    :return: None. As a side effect the weights of the transformer are changed.
-    """
-    tar_inp = tar[:, :-1]
-    tar_real = tar[:, 1:]
-
-    enc_padding_mask, combined_mask, dec_padding_mask = create_masks(inp, tar_inp)
-
-    with tf.GradientTape() as tape:
-        predictions, _ = transformer(inp, tar_inp,
-                                     True,
-                                     enc_padding_mask,
-                                     combined_mask,
-                                     dec_padding_mask)
-        loss = loss_function(tar_real, predictions)
-
-    gradients = tape.gradient(loss, transformer.trainable_variables)
-    optimizer.apply_gradients(zip(gradients, transformer.trainable_variables))

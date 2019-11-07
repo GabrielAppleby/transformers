@@ -24,13 +24,13 @@ class PrelimEncoder:
         return self.tokenizer_inpt.encode(inpt_lang)
 
     def encode_trgt(self, trgt_lang):
-        return self.tokenizer_inpt.encode(trgt_lang)
+        return self.tokenizer_trgt.encode(trgt_lang)
 
     def decode_inpt(self, inpt_vec):
         return self.tokenizer_inpt.decode(inpt_vec)
 
     def decode_trgt(self, trgt_vec):
-        return self.tokenizer_inpt.decode(trgt_vec)
+        return self.tokenizer_trgt.decode(trgt_vec)
 
     def tf_encode(self, inpt, trgt):
         return tf.py_function(self.encode, [inpt, trgt], [tf.int64, tf.int64])
@@ -42,13 +42,13 @@ class PrelimEncoder:
         return self.tokenizer_trgt.vocab_size + 2
 
     def get_inpt_start_token(self):
-        return [self.tokenizer_inpt.vocab_size]
+        return self.tokenizer_inpt.vocab_size
 
     def get_inpt_end_token(self):
-        return [self.tokenizer_inpt.vocab_size + 1]
+        return self.tokenizer_inpt.vocab_size + 1
 
     def get_trgt_start_token(self):
-        return [self.tokenizer_trgt.vocab_size]
+        return self.tokenizer_trgt.vocab_size
 
     def get_trgt_end_token(self):
-        return [self.tokenizer_trgt.vocab_size + 1]
+        return self.tokenizer_trgt.vocab_size + 1

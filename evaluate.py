@@ -15,7 +15,7 @@ def translate(transformer, prelim_encoder, sentence):
 
     predicted_sentence = prelim_encoder.decode_trgt([i for i in result
                                                      if
-                                                     i < prelim_encoder.get_trgt_vocab_size()])
+                                                     i < prelim_encoder.get_trgt_vocab_size() - 2])
 
     print('Input: {}'.format(sentence))
     print('Predicted translation: {}'.format(predicted_sentence))
@@ -29,8 +29,8 @@ def evaluate(transformer, prelim_encoder, inp_sentence):
     :param inp_sentence: The input sentence.
     :return: The target embeddings and the attention weights.
     """
-    start_token = prelim_encoder.get_inpt_start_token()
-    end_token = prelim_encoder.get_inpt_end_token()
+    start_token = [prelim_encoder.get_inpt_start_token()]
+    end_token = [prelim_encoder.get_inpt_end_token()]
 
     # inp sentence is portuguese, hence adding the start and end token
     inp_sentence = start_token + prelim_encoder.encode_inpt(inp_sentence) + end_token
@@ -38,7 +38,7 @@ def evaluate(transformer, prelim_encoder, inp_sentence):
 
     # as the target is english, the first word to the transformer should be the
     # english start token.
-    decoder_input = prelim_encoder.get_trgt_start_token()
+    decoder_input = [prelim_encoder.get_trgt_start_token()]
     output = tf.expand_dims(decoder_input, 0)
 
     for i in range(MAX_LENGTH):
