@@ -2,8 +2,13 @@ import tensorflow as tf
 from data_preprocessing.data_preprocessing_utils import create_masks
 from constants import MAX_LENGTH
 
+TRAIN_STEP_SIGNATURE = [
+    tf.TensorSpec(shape=(None, None), dtype=tf.int64),
+    tf.TensorSpec(shape=(None, None), dtype=tf.int64),
+]
 
-def translate(transformer, prelim_encoder, sentence):
+
+def translate(transformer, sentence, prelim_encoder):
     """
     Translates a sentence using the transformer and prelim encoder.
     :param transformer: The transformer.
@@ -19,6 +24,47 @@ def translate(transformer, prelim_encoder, sentence):
 
     print('Input: {}'.format(sentence))
     print('Predicted translation: {}'.format(predicted_sentence))
+
+    # test_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='train_accuracy')
+    #
+    # @tf.function(input_signature=TRAIN_STEP_SIGNATURE)
+    # def test_step(inp, tar):
+    #     """
+    #     Takes one step in the training process.
+    #     :param transformer: The transformer to train.
+    #     :param optimizer: The optimizer to use.
+    #     :param inp: The input sentence.
+    #     :param tar: The target sentence.
+    #     :return: None. As a side effect the weights of the transformer are changed.
+    #     """
+    #     tar_inp = tar[:, :-1]
+    #     tar_real = tar[:, 1:]
+    #
+    #     enc_padding_mask, combined_mask, dec_padding_mask = create_masks(inp,
+    #                                                                      tar_inp)
+    #
+    #     predictions, _ = transformer(inp, tar_inp,
+    #                                  True,
+    #                                  enc_padding_mask,
+    #                                  combined_mask,
+    #                                  dec_padding_mask)
+    #     test_accuracy(tar_real, predictions)
+    #     return predictions
+    #
+    # for (test_batch, (test_inp, test_tar)) in enumerate(test_dataset):
+    #     decoder_input = [prelim_encoder.get_trgt_start_token()]
+    #     output = tf.expand_dims(decoder_input, 0)
+    #     preds = test_step(test_inp, output)
+    #     print(preds)
+    #     print(preds[0])
+    #     print(preds.shape)
+    #     print(preds[0].shape)
+    #     predicted_sentence = prelim_encoder.decode_trgt([i for i in preds
+    #                                                      if
+    #                                                      i < prelim_encoder.get_trgt_vocab_size() - 2])
+    #     print(test_accuracy.result())
+    #     print('Real words: {}'.format(test_tar))
+    #     print('Predicted translation: {}'.format(predicted_sentence))
 
 
 def evaluate(transformer, prelim_encoder, inp_sentence):

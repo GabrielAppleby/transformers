@@ -13,7 +13,7 @@ TRAIN_STEP_SIGNATURE = [
 ]
 
 
-def train(transformer, train_dataset, d_model):
+def train(transformer, train_dataset, val_dataset, d_model):
     """
     Trains the transformer on the train_dataset.
     :param transformer: The transformer to train.
@@ -28,6 +28,7 @@ def train(transformer, train_dataset, d_model):
 
     # Defines the training loss and accuracy
     train_loss = tf.keras.metrics.Mean(name='train_loss')
+    val_loss = tf.keras.metrics.Mean(name='train_loss')
     train_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='train_accuracy')
 
     # Initializes a Checkpoint
@@ -78,13 +79,39 @@ def train(transformer, train_dataset, d_model):
 
         train_loss(loss)
         train_accuracy(tar_real, predictions)
+
+    @tf.function(input_signature=TRAIN_STEP_SIGNATURE)
+    def val_step(inp, tar):
+        """
+        Takes one step in the training process.
+        :param transformer: The transformer to train.
+        :param optimizer: The optimizer to use.
+        :param inp: The input sentence.
+        :param tar: The target sentence.
+        :return: None. As a side effect the weights of the transformer are changed.
+        """
+        tar_inp = tar[:, :-1]
+        tar_real = tar[:, 1:]
+
+        enc_padding_mask, combined_mask, dec_padding_mask = create_masks(inp,
+                                                                         tar_inp)
+
+        predictions, _ = transformer(inp, tar_inp,
+                                     True,
+                                     enc_padding_mask,
+                                     combined_mask,
+                                     dec_padding_mask)
+        loss = loss_function(tar_real, predictions)
+
+        val_loss(loss)
     ###########################################################################
 
     # Actual training loop
-    for epoch in range(1):
+    for epoch in range(0):
         start = time.time()
 
         train_loss.reset_states()
+        val_loss.reset_states()
         train_accuracy.reset_states()
 
         for (batch, (inp, tar)) in enumerate(train_dataset):
@@ -98,6 +125,10 @@ def train(transformer, train_dataset, d_model):
             ckpt_save_path = ckpt_manager.save()
             print('Saving checkpoint for epoch {} at {}'.format(epoch + 1,
                                                                 ckpt_save_path))
+
+            for (val_batch, (val_inp, val_tar)) in enumerate(val_dataset):
+                val_step(val_inp, val_tar)
+                print(val_loss.result())
 
         print('Epoch {} Loss {:.4f} Accuracy {:.4f}'.format(epoch + 1,
                                                             train_loss.result(),
