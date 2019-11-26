@@ -37,7 +37,7 @@ class Decoder(tf.keras.layers.Layer):
         x += self.pos_encoding[:, :seq_len, :]
 
         x = self.dropout(x, training=training)
-
+        print("decoding")
         for i in range(self.num_layers):
             x, block1, block2 = self.dec_layers[i](
                 x, enc_output, training, look_ahead_mask, padding_mask)

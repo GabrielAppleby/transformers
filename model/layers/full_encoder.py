@@ -38,6 +38,7 @@ class Encoder(tf.keras.layers.Layer):
 
         # adding embedding and position encoding.
         x = self.embedding(x)  # (batch_size, input_seq_len, d_model)
+        # Scale embedding by the sqrt of the hidden size
         x *= tf.math.sqrt(tf.cast(self.d_model, tf.float32))
         x += self.pos_encoding[:, :seq_len, :]
 

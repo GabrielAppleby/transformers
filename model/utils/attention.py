@@ -30,9 +30,6 @@ def scaled_dot_product_attention(q, k, v, mask):
     scaled_attention_logits = matmul_qk / tf.math.sqrt(dk)
 
     # add the mask to the scaled tensor.
-    # I just have like no idea why we need a mask for the padding / look ahead.
-    # I feel like the padding is info the nn can use
-    # Also I see no problem with look ahead for translation if I understand it correctly.
     if mask is not None:
         scaled_attention_logits += (mask * -1e9)
 

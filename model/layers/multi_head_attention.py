@@ -41,11 +41,10 @@ class MultiHeadAttention(tf.keras.layers.Layer):
         :param v: The "value" matrix
         :param k: The "key" matrix
         :param q: The "query" matrix
-        :param mask: The mask -- I still am not sure how the fuck this changes.
+        :param mask: The mask
         :return: None.
         """
         batch_size = tf.shape(q)[0]
-
         q = self.wq(q)  # (batch_size, seq_len, d_model)
         k = self.wk(k)  # (batch_size, seq_len, d_model)
         v = self.wv(v)  # (batch_size, seq_len, d_model)

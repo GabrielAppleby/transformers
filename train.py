@@ -49,7 +49,7 @@ def train(transformer, train_dataset, val_dataset, d_model):
     # tensors. To avoid re-tracing due to the variable sequence lengths or variable
     # batch sizes (the last batch is smaller), use input_signature to specify
     # more generic shapes.
-    @tf.function(input_signature=TRAIN_STEP_SIGNATURE)
+    # @tf.function(input_signature=TRAIN_STEP_SIGNATURE)
     def train_step(inp, tar):
         """
         Takes one step in the training process.
@@ -107,7 +107,7 @@ def train(transformer, train_dataset, val_dataset, d_model):
     ###########################################################################
 
     # Actual training loop
-    for epoch in range(0):
+    for epoch in range(1):
         start = time.time()
 
         train_loss.reset_states()
