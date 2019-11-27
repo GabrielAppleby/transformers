@@ -1,3 +1,5 @@
+import itertools
+import numpy as np
 import tensorflow as tf
 
 from constants import MAX_LENGTH
@@ -58,12 +60,20 @@ def preprocess_data_set(data, prelim_encoder, buffer_size, batch_size, cache=Fal
     :param cache:
     :return:
     """
-    encoded_data = data.map(prelim_encoder.tf_encode)
-    encoded_data = encoded_data.filter(filter_max_length)
-    encoded_data = encoded_data.shuffle(buffer_size).padded_batch(
-        batch_size, padded_shapes=([-1], [-1]), drop_remainder=True)
-    if cache:
-        encoded_data = encoded_data.cache()
-        encoded_data = encoded_data.prefetch(tf.data.experimental.AUTOTUNE)
+    one, two = prelim_encoder.encode(data)
+    one = tf.keras.preprocessing.sequence.pad_sequences(one, padding="post")
+    two = tf.keras.preprocessing.sequence.pad_sequences(two, padding="post")
+    pad_shp = one.shape[1]
+    if pad_shp < two.shape[1]:
+        pad_shp = two.shape[1]
+    data = tf.data.Dataset.from_tensor_slices((one, two))
 
-    return encoded_data
+    data = data.shuffle(buffer_size).padded_batch(64, padded_shapes=([pad_shp], [pad_shp]), drop_remainder=True)
+
+    data = data.map(lambda x, y: ((x, y), y))
+
+    if cache:
+        data = data.cache()
+        data = data.prefetch(tf.data.experimental.AUTOTUNE)
+
+    return data, pad_shp

@@ -19,7 +19,7 @@ class Decoder(tf.keras.layers.Layer):
                            for _ in range(num_layers)]
         self.dropout = tf.keras.layers.Dropout(rate)
 
-    def call(self, x, enc_output, training, look_ahead_mask, padding_mask):
+    def call(self, things):
         """
         Decodes the target sentence using the target generated so far as well as the enc_output.
         :param x: The target sentence generated so far.
@@ -29,21 +29,24 @@ class Decoder(tf.keras.layers.Layer):
         :param padding_mask: Stops the model from attending to padding.
         :return: None.
         """
+        x = things[0]
+        enc_output = things[1]
         seq_len = tf.shape(x)[1]
-        attention_weights = {}
 
         x = self.embedding(x)  # (batch_size, target_seq_len, d_model)
         x *= tf.math.sqrt(tf.cast(self.d_model, tf.float32))
         x += self.pos_encoding[:, :seq_len, :]
 
-        x = self.dropout(x, training=training)
-        print("decoding")
+        x = self.dropout(x)
         for i in range(self.num_layers):
-            x, block1, block2 = self.dec_layers[i](
-                x, enc_output, training, look_ahead_mask, padding_mask)
+            x = self.dec_layers[i](
+                (x, enc_output))
 
-            attention_weights['decoder_layer{}_block1'.format(i + 1)] = block1
-            attention_weights['decoder_layer{}_block2'.format(i + 1)] = block2
 
         # x.shape == (batch_size, target_seq_len, d_model)
-        return x, attention_weights
+        return x
+
+    def compute_output_shape(self, input_shape):
+        shp = input_shape
+        shp[-1] = self.f_prime
+        return shp

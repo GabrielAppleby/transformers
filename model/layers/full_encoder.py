@@ -18,7 +18,6 @@ class Encoder(tf.keras.layers.Layer):
         self.d_model = d_model
         self.num_layers = num_layers
 
-        self.embedding = tf.keras.layers.Embedding(input_vocab_size, d_model)
         self.pos_encoding = positional_encoding(maximum_position_encoding, self.d_model)
 
         self.enc_layers = [EncoderBlock(d_model, num_heads, dff, rate)
@@ -26,7 +25,7 @@ class Encoder(tf.keras.layers.Layer):
 
         self.dropout = tf.keras.layers.Dropout(rate)
 
-    def call(self, x, training, mask):
+    def call(self, x):
         """
         Goes from preliminary encoding embedding to embedding to send to decoder.
         :param x: The input preliminary embedding.
@@ -34,18 +33,17 @@ class Encoder(tf.keras.layers.Layer):
         :param mask: The mask for padding.
         :return: Nothing.
         """
-        seq_len = tf.shape(x)[1]
+        # seq_len = tf.shape(x)[1]
 
         # adding embedding and position encoding.
-        x = self.embedding(x)  # (batch_size, input_seq_len, d_model)
         # Scale embedding by the sqrt of the hidden size
-        x *= tf.math.sqrt(tf.cast(self.d_model, tf.float32))
-        x += self.pos_encoding[:, :seq_len, :]
+        # x *= tf.math.sqrt(tf.cast(self.d_model, tf.float32))
+        # x += self.pos_encoding[:, :seq_len, :]
 
-        x = self.dropout(x, training=training)
+        x = self.dropout(x)
 
         for i in range(self.num_layers):
-            x = self.enc_layers[i](x, training, mask)
+            x = self.enc_layers[i](x)
 
         # (batch_size, input_seq_len, d_model)
         return x
