@@ -22,6 +22,7 @@ class Decoder(tf.keras.layers.Layer):
 
     def call(self, inputs, mask=None):
         tgt = inputs[0]
+        tgt = tgt[:, :-1]
         enc_output = inputs[1]
         mask = mask[1]
 
