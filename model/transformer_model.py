@@ -2,6 +2,7 @@ import tensorflow as tf
 
 from model.layers.full_decoder import Decoder
 from model.layers.full_encoder import Encoder
+from objective_optimization.losses import MaskedSparseCrossEntropy
 
 
 def get_transformer(input_vocab_size, target_vocab_size, num_blocks, d_model, num_heads, dff, drop_rate):
@@ -14,3 +15,10 @@ def get_transformer(input_vocab_size, target_vocab_size, num_blocks, d_model, nu
     model = tf.keras.Model(inputs=[src, tgt], outputs=predictions)
 
     return model
+
+
+def compile_model(transformer):
+    transformer.compile(
+        optimizer="Adam",
+        loss=MaskedSparseCrossEntropy())
+    return transformer

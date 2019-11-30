@@ -1,5 +1,6 @@
-from train import compile_and_train
-from model.transformer_model import get_transformer
+from train import train
+from test import test, translate
+from model.transformer_model import get_transformer, compile_model
 from data_utils.utils import preprocess_data_set, \
     get_prelim_encoder, get_npz_translation_data
 
@@ -14,12 +15,15 @@ HOMER_FILE_PATH = "data/data.npz"
 
 
 def main():
-    raw_train_data, raw_validation_data = get_npz_translation_data(HOMER_FILE_PATH)
+    raw_train_data, raw_validation_data, raw_test_data = get_npz_translation_data(HOMER_FILE_PATH)
     prelim_encoder = get_prelim_encoder(raw_train_data)
+
     train_data = preprocess_data_set(
         raw_train_data, prelim_encoder, BUFFER_SIZE, BATCH_SIZE)
     validation_data = preprocess_data_set(
         raw_validation_data, prelim_encoder, BUFFER_SIZE, BATCH_SIZE)
+    test_data = preprocess_data_set(
+        raw_test_data, prelim_encoder, BUFFER_SIZE, BATCH_SIZE, inference=True)
 
     transformer = get_transformer(prelim_encoder.get_src_vocab_size(),
                                   prelim_encoder.get_tgt_vocab_size(),
@@ -28,8 +32,9 @@ def main():
                                   NUM_HEADS,
                                   D_FF,
                                   DROPOUT_RATE)
-
-    transformer = compile_and_train(transformer, train_data, validation_data)
+    transformer = compile_model(transformer)
+    # transformer = train(transformer, train_data, validation_data)
+    translate(transformer, test_data, prelim_encoder)
 
 
 if __name__ == "__main__":

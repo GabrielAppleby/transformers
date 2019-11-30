@@ -11,18 +11,24 @@ class PrelimEncoder:
             (tgt for tgt in train_examples[1]), target_vocab_size=tgt_vocab_size)
 
     def encode(self, src, tgt):
-        src = list(map(self.encode_src, src))
-        tgt = list(map(self.encode_trg, tgt))
+        src = list(map(self.encode_src_seq, src))
+        tgt = list(map(self.encode_trg_seq, tgt))
 
         return src, tgt
 
-    def encode_src(self, src):
+    def encode_src_seq(self, src):
         return [self.tokenizer_src.vocab_size] + self.tokenizer_src.encode(
             src) + [self.tokenizer_src.vocab_size + 1]
 
-    def encode_trg(self, tgt):
+    def encode_trg_seq(self, tgt):
         return [self.tokenizer_tgt.vocab_size] + self.tokenizer_tgt.encode(
             tgt) + [self.tokenizer_tgt.vocab_size + 1]
+
+    def decode_src_word(self, src):
+        return self.tokenizer_src.decode(src)
+
+    def decode_tgt_word(self, tgt):
+        return self.tokenizer_tgt.decode(tgt)
 
     def get_src_vocab_size(self):
         return self.tokenizer_src.vocab_size + 2
