@@ -4,7 +4,7 @@ from model.utils.attention import scaled_dot_product_attention
 
 
 class MultiHeadAttention(tf.keras.layers.Layer):
-    def __init__(self, d_model, num_heads):
+    def __init__(self, d_model, num_heads, **kwargs):
         super(MultiHeadAttention, self).__init__()
         self.num_heads = num_heads
         self.d_model = d_model
@@ -60,3 +60,9 @@ class MultiHeadAttention(tf.keras.layers.Layer):
 
     def compute_mask(self, inputs, mask=None):
         return None
+
+    def get_config(self):
+        config = super().get_config()
+        config['d_model'] = self.d_model
+        config['num_heads'] = self.num_heads
+        return config

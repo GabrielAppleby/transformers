@@ -5,8 +5,13 @@ from model.layers.multi_head_attention import MultiHeadAttention
 
 
 class DecoderBlock(tf.keras.layers.Layer):
-    def __init__(self, d_model, num_heads, dff, rate=0.1):
+    def __init__(self, d_model, num_heads, dff, rate=0.1, **kwargs):
         super(DecoderBlock, self).__init__()
+
+        self.d_model = d_model
+        self.num_heads = num_heads
+        self.dff = dff
+        self.rate = rate
 
         self.mha1 = MultiHeadAttention(d_model, num_heads)
         self.mha2 = MultiHeadAttention(d_model, num_heads)
@@ -41,3 +46,11 @@ class DecoderBlock(tf.keras.layers.Layer):
 
     def compute_mask(self, inputs, mask=None):
         return None
+
+    def get_config(self):
+        config = super().get_config()
+        config['d_model'] = self.d_model
+        config['num_heads'] = self.num_heads
+        config['dff'] = self.dff
+        config['rate'] = self.rate
+        return config

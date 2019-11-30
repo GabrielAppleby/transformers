@@ -6,14 +6,19 @@ from data_utils.utils import create_look_ahead_mask, create_padding_mask
 
 
 class Decoder(tf.keras.layers.Layer):
-    def __init__(self, num_layers, d_model, num_heads, dff, target_vocab_size,
-                 maximum_position_encoding, rate=0.1):
+    def __init__(self, num_layers, d_model, num_heads, dff, tgt_vocab_size,
+                 maximum_position_encoding, rate=0.1, **kwargs):
         super(Decoder, self).__init__()
 
-        self.d_model = d_model
         self.num_layers = num_layers
+        self.d_model = d_model
+        self.num_heads = num_heads
+        self.dff = dff
+        self.tgt_vocab_size = tgt_vocab_size
+        self.maximum_position_encoding = maximum_position_encoding
+        self.rate = rate
 
-        self.embedding = tf.keras.layers.Embedding(target_vocab_size, d_model, mask_zero=False)
+        self.embedding = tf.keras.layers.Embedding(tgt_vocab_size, d_model, mask_zero=False)
         self.pos_encoding = positional_encoding(maximum_position_encoding, d_model)
 
         self.dec_layers = [DecoderBlock(d_model, num_heads, dff, rate)
@@ -46,3 +51,14 @@ class Decoder(tf.keras.layers.Layer):
 
     def compute_mask(self, inputs, mask=None):
         return None
+
+    def get_config(self):
+        config = super().get_config()
+        config['num_layers'] = self.num_layers
+        config['d_model'] = self.d_model
+        config['num_heads'] = self.num_heads
+        config['dff'] = self.dff
+        config['tgt_vocab_size'] = self.tgt_vocab_size
+        config['maximum_position_encoding'] = self.maximum_position_encoding
+        config['rate'] = self.rate
+        return config

@@ -6,14 +6,19 @@ from model.utils.positional_encoding import positional_encoding
 
 
 class Encoder(tf.keras.layers.Layer):
-    def __init__(self, num_layers, d_model, num_heads, dff, input_vocab_size,
-                 maximum_position_encoding, rate=0.1):
+    def __init__(self, num_layers, d_model, num_heads, dff, src_vocab_size,
+                 maximum_position_encoding, rate=0.1, **kwargs):
         super(Encoder, self).__init__()
 
-        self.d_model = d_model
         self.num_layers = num_layers
+        self.d_model = d_model
+        self.num_heads = num_heads
+        self.dff = dff
+        self.src_vocab_size = src_vocab_size
+        self.maximum_position_encoding = maximum_position_encoding
+        self.rate = rate
 
-        self.embedding = tf.keras.layers.Embedding(input_vocab_size, d_model, mask_zero=True)
+        self.embedding = tf.keras.layers.Embedding(src_vocab_size, d_model, mask_zero=True)
         self.pos_encoding = positional_encoding(maximum_position_encoding,
                                                 self.d_model)
 
@@ -41,3 +46,14 @@ class Encoder(tf.keras.layers.Layer):
 
     def compute_mask(self, inputs, mask=None):
         return create_padding_mask(inputs)
+
+    def get_config(self):
+        config = super().get_config()
+        config['num_layers'] = self.num_layers
+        config['d_model'] = self.d_model
+        config['num_heads'] = self.num_heads
+        config['dff'] = self.dff
+        config['src_vocab_size'] = self.src_vocab_size
+        config['maximum_position_encoding'] = self.maximum_position_encoding
+        config['rate'] = self.rate
+        return config

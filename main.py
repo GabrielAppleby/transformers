@@ -3,6 +3,7 @@ from test import test, translate
 from model.transformer_model import get_transformer, compile_model
 from data_utils.utils import preprocess_data_set, \
     get_prelim_encoder, get_npz_translation_data
+from save_and_load import save_model, load_model
 
 BUFFER_SIZE = 20000
 BATCH_SIZE = 64
@@ -22,8 +23,8 @@ def main():
         raw_train_data, prelim_encoder, BUFFER_SIZE, BATCH_SIZE)
     validation_data = preprocess_data_set(
         raw_validation_data, prelim_encoder, BUFFER_SIZE, BATCH_SIZE)
-    test_data = preprocess_data_set(
-        raw_test_data, prelim_encoder, BUFFER_SIZE, BATCH_SIZE, inference=True)
+    # test_data = preprocess_data_set(
+    #     raw_test_data, prelim_encoder, BUFFER_SIZE, BATCH_SIZE, inference=True)
 
     transformer = get_transformer(prelim_encoder.get_src_vocab_size(),
                                   prelim_encoder.get_tgt_vocab_size(),
@@ -33,8 +34,10 @@ def main():
                                   D_FF,
                                   DROPOUT_RATE)
     transformer = compile_model(transformer)
-    # transformer = train(transformer, train_data, validation_data)
-    translate(transformer, test_data, prelim_encoder)
+    transformer = train(transformer, train_data, validation_data)
+    save_model(transformer)
+    # transformer = load_model()
+    # translate(transformer, test_data, prelim_encoder)
 
 
 if __name__ == "__main__":
