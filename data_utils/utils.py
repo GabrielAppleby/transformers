@@ -5,12 +5,12 @@ import tensorflow as tf
 
 def get_npz_translation_data(file_path):
     data = np.load(file_path)
-    raw_train_src = data["train_src"][:400]
-    raw_train_tgt = data["train_tgt"][:400]
-    raw_val_src = data["val_src"][:400]
-    raw_val_tgt = data["val_tgt"][:400]
-    raw_test_src = data["test_src"][:400]
-    raw_test_tgt = data["test_tgt"][:400]
+    raw_train_src = data["train_src"]
+    raw_train_tgt = data["train_tgt"]
+    raw_val_src = data["val_src"]
+    raw_val_tgt = data["val_tgt"]
+    raw_test_src = data["test_src"]
+    raw_test_tgt = data["test_tgt"]
 
     raw_train = (raw_train_src, raw_train_tgt)
     raw_val = (raw_val_src, raw_val_tgt)

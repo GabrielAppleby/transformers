@@ -13,10 +13,10 @@ def translate(transformer, data, prelim_encoder):
     pad_token_list = [0]
 
     pred_id = 1
-    src, _ = data
-    for seq_src in src:
-        greek = prelim_encoder.decode_src_word(
-            [i for i in seq_src if i < prelim_encoder.get_src_vocab_size() - 2])
+    src, tgt = data
+    for seq_src, seq_tgt in zip(src, tgt):
+        y_true = prelim_encoder.decode_tgt_word(
+            [i for i in seq_tgt if i < prelim_encoder.get_tgt_vocab_size() - 2])
         seq_pred = []
 
         seq_tgt = tgt_start_token_list + pad_token_list
@@ -40,4 +40,6 @@ def translate(transformer, data, prelim_encoder):
                 pass
                 #print("This should mean stop token probably, so should end sentence.")
 
-        print('Predicted translation: {}'.format(seq_pred))
+        pred_id = 1
+        print('Actual translation: {}'.format(y_true))
+        print('Predicted translation: {}'.format(''.join(seq_pred)))
