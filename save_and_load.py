@@ -9,7 +9,7 @@ from model.layers.multi_head_attention import MultiHeadAttention
 
 MODELS_PATH = "saved_models"
 MODEL_NAME = "transformer"
-FILE_NAME = os.path.join(MODELS_PATH, MODEL_NAME) + ".h5"
+FILE_NAME = os.path.join(MODELS_PATH, MODEL_NAME) + "_prot.h5"
 
 
 # In order to save models all custom objects must be announced to Keras.

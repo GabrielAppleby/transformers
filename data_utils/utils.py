@@ -1,6 +1,22 @@
 import numpy as np
 from data_utils.prelim_encoder import PrelimEncoder
 import tensorflow as tf
+import tensorflow_datasets as tfds
+
+
+def get_sanity_check_data():
+    examples, metadata = tfds.load('ted_hrlr_translate/pt_to_en',
+                                   with_info=True,
+                                   as_supervised=True)
+    examples = tfds.as_numpy(examples, graph=None)
+
+    train_src = []
+    train_tgt = []
+    for src, tgt in examples["train"]:
+        train_src.append(src)
+        train_tgt.append(tgt)
+
+    return train_src, train_tgt
 
 
 def get_npz_translation_data(file_path):
