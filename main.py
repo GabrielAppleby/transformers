@@ -35,7 +35,7 @@ def main():
     #                               NUM_HEADS,
     #                               D_FF,
     #                               DROPOUT_RATE)
-    transformer = compile_model(transformer, D_MODEL)
+    # transformer = compile_model(transformer, D_MODEL)
     # transformer = train(transformer, train_data, validation_data)
     # save_model(transformer)
     translate(transformer, test_data, prelim_encoder)
