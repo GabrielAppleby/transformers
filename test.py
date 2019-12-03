@@ -38,7 +38,7 @@ def translate(transformer, data, prelim_encoder):
                 seq_tgt.insert(-1, pred_id[0])
             else:
                 pass
-                #print("This should mean stop token probably, so should end sentence.")
+                #print("This should mean stop token, so should end sentence.")
 
         pred_id = 1
         print('Actual translation: {}'.format(y_true))
